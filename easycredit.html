@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank CRM Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #004aad;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            margin: 20px auto;
+            max-width: 800px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .customer-info, .credit-info, .notes-section {
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .notes-section:last-child {
+            border-bottom: none;
+        }
+        h2 {
+            margin: 0 0 10px;
+        }
+        p {
+            margin: 5px 0;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #004aad;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .btn:hover {
+            background-color: #00337a;
+        }
+        .notes-section textarea {
+            width: 100%;
+            height: 60px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .note-item {
+            background: #f5f5f5;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-left: 4px solid #004aad;
+            border-radius: 4px;
+        }
+        .note-item time {
+            display: block;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Bank CRM System</h1>
+    </div>
+    <div class="container">
+        <div class="customer-info">
+            <h2>Kundendaten</h2>
+            <p><strong>Name:</strong> Max Mustermann</p>
+            <p><strong>Kundennummer:</strong> 123456789</p>
+            <p><strong>Adresse:</strong> Musterstraße 123, 10115 Berlin</p>
+            <p><strong>Telefon:</strong> +49 30 1234567</p>
+            <p><strong>Email:</strong> max.mustermann@example.com</p>
+        </div>
+        <div class="credit-info">
+            <h2>Kreditdetails</h2>
+            <p><strong>Kreditname:</strong> EasyRaten Kredit</p>
+            <p><strong>Gesamtbetrag:</strong> 30.000 €</p>
+            <p><strong>Laufzeit:</strong> 60 Monate</p>
+            <p><strong>Monatliche Rate:</strong> 500 €</p>
+            <p><strong>Restlaufzeit:</strong> 48 Monate</p>
+        </div>
+        <div class="notes-section">
+            <h2>Telefonnotizen</h2>
+            <div id="notes">
+                <!-- Vorhandene Notiz -->
+                <div class="note-item">
+                    <p>Der Kunde hat einen EasyRaten Kredit abgeschlossen.</p>
+                    <time>2024-11-15 14:30</time>
+                </div>
+            </div>
+            <textarea id="noteInput" placeholder="Neue Notiz hinzufügen..."></textarea>
+            <button class="btn" onclick="addNote()">Speichern</button>
+        </div>
+    </div>
+    <script>
+        function addNote() {
+            const noteInput = document.getElementById('noteInput');
+            const notes = document.getElementById('notes');
+            const now = new Date();
+            
+            if (noteInput.value.trim() !== "") {
+                const noteDiv = document.createElement('div');
+                noteDiv.className = 'note-item';
+                
+                const noteText = document.createElement('p');
+                noteText.textContent = noteInput.value;
+                
+                const noteTime = document.createElement('time');
+                noteTime.textContent = now.toISOString().slice(0, 16).replace('T', ' ');
+                
+                noteDiv.appendChild(noteText);
+                noteDiv.appendChild(noteTime);
+                notes.appendChild(noteDiv);
+                
+                noteInput.value = ""; // Eingabefeld leeren
+            } else {
+                alert("Bitte geben Sie eine Notiz ein.");
+            }
+        }
+    </script>
+</body>
+</html>
