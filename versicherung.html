@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Versicherung</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Header Styling */
+        header {
+            background-color: #004080;
+            color: white;
+            padding: 10px 20px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+        }
+
+        nav a:hover {
+            background-color: #002f5f;
+            border-radius: 5px;
+        }
+
+        /* Hero Image */
+        .hero-image {
+            width: 100%;
+            height: 50vh;
+            background-image: url('versicherung.png'); /* Replace with your image */
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Features Section */
+        .features {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 40px 20px;
+            background-color: #f4f4f4;
+        }
+
+        .feature {
+            text-align: center;
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .feature img {
+            width: 100px;
+            height: 100px;
+        }
+
+        .feature h3 {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav>
+        <a href="#privatkunden">Privatkunden</a>
+        <a href="#unternehmenskunden">Unternehmenskunden</a>
+        <a href="#dienstleistungen">Dienstleistungen</a>
+        <a href="#ueber-uns">Über uns</a>
+    </nav>
+</header>
+
+<div class="hero-image"></div>
+
+<section class="features">
+    <div class="feature">
+        <img src="praemie.png" alt="Prämie berechnen">
+        <h3>Prämie berechnen</h3>
+        <p>Ermitteln Sie schnell und einfach Ihre Versicherungsprämie.</p>
+    </div>
+    <div class="feature">
+        <img src="schaden.png" alt="Schaden melden">
+        <h3>Schaden melden</h3>
+        <p>Melden Sie einen Schaden direkt online und unkompliziert.</p>
+    </div>
+    <div class="feature">
+        <img src="kundencenter.png" alt="Kundencenter">
+        <h3>Kundencenter</h3>
+        <p>Ihre Vertragsdetails und Kontaktmöglichkeiten auf einen Blick.</p>
+    </div>
+</section>
+
+</body>
+</html>
