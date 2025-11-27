@@ -13,9 +13,6 @@
 <script crossorigin="anonymous" src="https://live-chat.spitch-dev.ai/webchat/index.js"></script>
 <script>
     /*
-     * NOTE! hostname 'live-chat.spitch-dev.ai' may differ
-     *   in case the 'adapters-server' is deployed on a separate server (DMZ)
-     *  
      * USAGE NOTES:
      * - populate userId only for authorized users
      * - populate userData to skip the 'welcome' dialog (as shown below)
@@ -37,10 +34,13 @@
                 username: "anonymous",
                 firstName: "anonymous", 
                 lastName: "anonymous", 
-            }
+            },
+            /* enable the polling mode if the endpoint is not available via websockets */
+            pollingMode: false,
+            pollingTimeout: 30000
         });
     });
 </script>
-
+	
 </body>
 </html>
