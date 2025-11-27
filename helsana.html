@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retraites Populaires</title>
+    <meta name="description" content="Retraites Populaires - Assurance-vie et prévoyance professionnelle.">
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden;">
+    <img src="Retraites_Populaires2.png" alt="Retraites Populaires" style="width: 100vw; height: 100vh; object-fit: cover;">
+	
+<div id="web-chat-root-id"></div>
+<script crossorigin="anonymous" src="https://live-chat.spitch-dev.ai/webchat/index.js"></script>
+<script>
+    /*
+     * NOTE! hostname 'live-chat.spitch-dev.ai' may differ
+     *   in case the 'adapters-server' is deployed on a separate server (DMZ)
+     *  
+     * USAGE NOTES:
+     * - populate userId only for authorized users
+     * - populate userData to skip the 'welcome' dialog (as shown below)
+     */
+    window.addEventListener('load', () => {
+        if (typeof window.web_chat_init !== 'function') {
+            console.log('WebChat is not initialized');
+            return;
+        }
+
+        window.web_chat_init({
+            rootId: 'web-chat-root-id',
+            endpoint: 'wss://live-chat.spitch-dev.ai/webhooks/website/68f7a9d9f3e02dbc7d744069',
+            adapterId: '68f7a9d9f3e02dbc7d744069',
+            // userId is automatically generated if empty
+            userId: "",
+            // remove userData to enable the 'welcome form' 
+            userData: {
+                username: "anonymous",
+                firstName: "anonymous", 
+                lastName: "anonymous", 
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
