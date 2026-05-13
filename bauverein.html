@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bauverein</title>
+    <meta name="description" content="Bauverein">
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden;">
+    <img src="bauverein.png" alt="Bauverein AG" style="width: 100vw; height: 100vh; object-fit: contain;">
+	
+<div id="web-chat-root-id"></div>
+<script crossorigin="anonymous" src="https://live-chat.spitch-dev.ai/webchat/index.js"></script>
+<script>
+    /*
+     * USAGE NOTES:
+     * - populate userId only for authorized users
+     * - populate userData to skip the 'welcome' dialog (as shown below)
+     */
+    window.addEventListener('load', () => {
+        if (typeof window.web_chat_init !== 'function') {
+            console.log('WebChat is not initialized');
+            return;
+        }
+
+        window.web_chat_init({
+            rootId: 'web-chat-root-id',
+            endpoint: 'wss://live-chat.spitch-dev.ai/webhooks/website/6a04a3f19180aab3a8891dc4',
+            adapterId: '6a04a3f19180aab3a8891dc4',
+            // userId is automatically generated if empty
+            userId: "",
+            // remove userData to enable the 'welcome form' 
+            userData: {
+                username: "anonymous",
+                firstName: "anonymous", 
+                lastName: "anonymous", 
+            },
+            /* enable the polling mode if the endpoint is not available via websockets */
+            pollingMode: false,
+            pollingTimeout: 30000
+        });
+    });
+</script>
+
+	
+</body>
+</html>
+
+
+
