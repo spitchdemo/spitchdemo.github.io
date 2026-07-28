@@ -1,0 +1,21 @@
+<head>
+    <meta charset="UTF-8">
+    <title>Genesys Test</title>
+
+    <!-- Client App SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/purecloud-client-app-sdk@2.6.0/dist/purecloud-client-app-sdk.js"></script>
+
+    <!-- 1. Lokales Platform SDK -->
+    <script src="./purecloud-platform-client-v2.min.js"></script>
+
+    <!-- 2. Sofort-Test-Skript -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (window.platformClient) {
+                log("✅ Erfolg: 'purecloud-platform-client-v2.min.js' wurde lokal geladen!");
+            } else {
+                log("❌ Fehler: Datei konnte nicht geladen werden. Pfad/Dateiname prüfen!");
+            }
+        });
+    </script>
+</head>
