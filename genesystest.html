@@ -1,61 +1,32 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-			<title>Genesys Event Monitor</title>
-		</head>
-		<body>
-			<h2>Genesys Monitor</h2>
-			<pre id="log"/>
-			<script>
-				function log(msg) {
-					document.getElementById("log").textContent += msg + "\n";
-				}
-					const parentWin = window.parent;
-				/*
-				* Prüfen ob CXBus verfügbar ist
-				*/
-				if (parentWin.CXBus) {
-					log("CXBus gefunden");
-					parentWin.CXBus.subscribe(
-						"Interaction",
-						"changed",
-						function(evt, interaction) {
-							log(
-								"Call: " +
-								interaction.state
-							);
-							console.log(interaction);
-							if (interaction.userData) {
-									console.log(
-										interaction.userData
-									);
-							}
-						}
-					);
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Call Script iFrame</title>
+    <!-- 1. Offizielles Genesys Client App SDK einbinden -->
+    <script src="https://sdk-cdn.mypurecloud.com/client-app-sdk/v2/purecloud-client-app-sdk.js"></script>
+</head>
+<body>
+	Genesys Desktop
+    <pre id="log"></pre>
 
-					parentWin.CXBus.subscribe(
-						"User",
-						"changed",
-						function(evt, user) {
-							log(
-								"User State: " +
-								user.state
-							);
+    <script>
+        function log(msg) {
+            document.getElementById("log").textContent += msg + "\n";
+        }
 
-							console.log(user);
-						}
-					);
+        // 2. SDK initialisieren (ohne window.parent zu berühren)
+        const ClientApp = window.purecloud.apps.ClientApp;
+        const myApp = new ClientApp({
+            pcEnvironment: 'mypurecloud.de' // Passen Sie Ihre Region an (z. B. mypurecloud.de, mypurecloud.ie)
+        });
 
-				} else {
-					log("CXBus nicht gefunden");
-				}
+        log("App erfolgreich im Genesys Desktop registriert.");
 
-				/*
-				* Verfügbare globale Objekte anzeigen
-				*/
-				console.log(Object.keys(parentWin));
-
-			</script>
-		</body>
-	</html>
+        // 3. Beispiel: Auf Fokus-Events des iFrames reagieren
+        myApp.lifecycle.addFocusListener(() => {
+            log("iFrame hat Fokus erhalten");
+        });
+    </script>
+</body>
+</html>
