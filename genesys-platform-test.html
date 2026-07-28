@@ -6,16 +6,27 @@
     <!-- 1. Client App SDK -->
     <script src="./purecloud-client-app-sdk.js"></script>
 
-    <!-- 2. Lokales Platform SDK -->
+    <!-- 2. Platform SDK (Browser-CJS-Version) -->
     <script src="./purecloud-platform-client-v2.min.js"></script>
 
-    <!-- 3. Test-Skript (ohne verfrühten log()-Aufruf) -->
+    <!-- 3. Test-Skript -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            if (window.platformClient) {
-                console.log("✅ Platform SDK erfolgreich geladen!");
-            } else {
-                console.error("❌ Fehler: Platform SDK konnte nicht geladen werden.");
+            try {
+                // Wichtig: über require() holen, nicht window.platformClient
+                const platformClient = require('platformClient');
+
+                if (platformClient && platformClient.ApiClient) {
+                    console.log("✅ Platform SDK erfolgreich geladen!");
+                    console.log("ApiClient verfügbar:", !!platformClient.ApiClient);
+                    
+                    // Beispiel:
+                    // const client = platformClient.ApiClient.instance;
+                } else {
+                    console.error("❌ Platform SDK geladen, aber ApiClient fehlt.");
+                }
+            } catch (e) {
+                console.error("❌ Fehler beim Laden des Platform SDK:", e);
             }
         });
     </script>
