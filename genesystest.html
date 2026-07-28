@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+			<title>Genesys Event Monitor</title>
+		</head>
+		<body>
+			<h2>Genesys Monitor</h2>
+			<pre id="log"/>
+			<script>
+				function log(msg) {
+					document.getElementById("log").textContent += msg + "\n";
+				}
+					const parentWin = window.parent;
+				/*
+				* Prüfen ob CXBus verfügbar ist
+				*/
+				if (parentWin.CXBus) {
+					log("CXBus gefunden");
+					parentWin.CXBus.subscribe(
+						"Interaction",
+						"changed",
+						function(evt, interaction) {
+							log(
+								"Call: " +
+								interaction.state
+							);
+							console.log(interaction);
+							if (interaction.userData) {
+									console.log(
+										interaction.userData
+									);
+							}
+						}
+					);
+
+					parentWin.CXBus.subscribe(
+						"User",
+						"changed",
+						function(evt, user) {
+							log(
+								"User State: " +
+								user.state
+							);
+
+							console.log(user);
+						}
+					);
+
+				} else {
+					log("CXBus nicht gefunden");
+				}
+
+				/*
+				* Verfügbare globale Objekte anzeigen
+				*/
+				console.log(Object.keys(parentWin));
+
+			</script>
+		</body>
+	</html>
