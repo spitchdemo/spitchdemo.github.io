@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Genesys Live Call & Presence Monitor</title>
-    <!-- Client App SDK & Platform SDK -->
-    <script src="./purecloud-client-app-sdk.js"></script>
-    <script src="./purecloud-platform-client-v2.min.js"></script>
+    <title>Genesys Live Call & Status Monitor</title>
+
+    <!-- 1. Genesys Client App SDK v2 (jsDelivr) -->
+    <script src="https://cdn.jsdelivr.net/npm/purecloud-client-app-sdk@2.6.0/dist/purecloud-client-app-sdk.js"></script>
+    
+    <!-- 2. Genesys Platform Client SDK (Web Bundle) -->
+    <script src="https://cdn.jsdelivr.net/npm/purecloud-platform-client-v2/dist/web-cjs/purecloud-platform-client-v2.min.js"></script>
 
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f5f7;
             color: #333;
             margin: 0;
@@ -48,13 +51,17 @@
         .state-alerting { background: #ffab00; color: #fff; }
         .state-connected { background: #36b37e; color: #fff; }
         .state-disconnected { background: #ff5630; color: #fff; }
-        .state-wrapup { background: #6554c0; color: #fff; }
 
         .data-row {
             display: flex;
             justify-content: space-between;
             padding: 4px 0;
             font-size: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
         }
 
         .label { color: #6b778c; font-weight: 500; }
@@ -67,7 +74,7 @@
             font-size: 11px;
             padding: 8px;
             border-radius: 6px;
-            height: 110px;
+            height: 120px;
             overflow-y: auto;
             white-space: pre-wrap;
         }
@@ -75,11 +82,11 @@
 </head>
 <body>
 
-    <!-- 1. Agenten & Call Status Dashboard -->
+    <!-- 1. Live Dashboard -->
     <div class="card">
         <div class="status-header">
             <div>
-                <span class="label">Agent Status:</span>
+                <span class="label">Agent Presence:</span>
                 <strong id="agentPresence" style="color: #0052cc;">Initialisiere...</strong>
             </div>
             <span id="callStateBadge" class="badge state-idle">IDLE</span>
@@ -98,15 +105,19 @@
             <span id="customerNumber" class="value">-</span>
         </div>
         <div class="data-row">
-            <span class="label">Zielnummer (DNIS):</span>
-            <span id="dnis" class="value">-</span>
+            <span class="label">Agent Email:</span>
+            <span id="agentEmail" class="value">-</span>
         </div>
     </div>
 
     <!-- 2. Live Log-Konsole -->
-    <div class="log-box" id="log">--- System Event Log ---<br></div>
+    <div class="log-box" id="log">--- System Log gestartet ---<br></div>
 
     <script>
+        // OAuth Client ID aus Genesys Admin
+        const CLIENT_ID = '83accf17-8af6-4c0a-9b69-2fca2010fa21'; 
+        const ENVIRONMENT = 'mypurecloud.ie'; // Irland Region
+
         function log(msg) {
             const logElem = document.getElementById("log");
             const time = new Date().toLocaleTimeString();
@@ -122,134 +133,147 @@
             statusText.textContent = text;
             badge.textContent = state.toUpperCase();
             
-            // CSS Klasse anpassen
             badge.className = "badge " + (
                 state === 'alerting' ? 'state-alerting' :
                 state === 'connected' ? 'state-connected' :
-                state === 'disconnected' ? 'state-disconnected' :
-                state === 'wrapup' ? 'state-wrapup' : 'state-idle'
+                state === 'disconnected' ? 'state-disconnected' : 'state-idle'
             );
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
-            // A. Grunddaten aus URL lesen (Fallbacks)
+            // A. URL-Parameter auslesen (aus Script-Designer übergeben)
             const urlParams = new URLSearchParams(window.location.search);
-            const initInteractionId = urlParams.get('interactionId');
-            const initCustomerNumber = urlParams.get('customerNumber');
+            const initInteractionId = urlParams.get('interactionId') || 'Nicht übergeben';
+            const initCustomerNumber = urlParams.get('customerNumber') || 'Nicht übergeben';
+            const initAgentEmail = urlParams.get('agentEmail') || 'Nicht übergeben';
 
-            if (initInteractionId) document.getElementById("interactionId").textContent = initInteractionId;
-            if (initCustomerNumber) document.getElementById("customerNumber").textContent = initCustomerNumber;
+            document.getElementById("interactionId").textContent = initInteractionId;
+            document.getElementById("customerNumber").textContent = initCustomerNumber;
+            document.getElementById("agentEmail").textContent = initAgentEmail;
 
-            // B. Client App SDK für Basis-Verbindung
+            // B. Client App SDK verbinden
             try {
-                const ClientApp = window.purecloud && window.purecloud.apps && window.purecloud.apps.ClientApp;
+                const ClientApp = (window.purecloud && window.purecloud.apps && window.purecloud.apps.ClientApp) || window.ClientApp;
                 if (ClientApp) {
-                    const myApp = new ClientApp({ pcEnvironment: 'mypurecloud.ie' });
-                    log("✓ Genesys Client App SDK verbunden");
-
-                    // C. Platform SDK & WebSocket Notifications aufbauen
-                    initGenesysNotifications();
-                } else {
-                    log("❌ ClientApp SDK nicht gefunden");
+                    const myApp = new ClientApp({ pcEnvironment: ENVIRONMENT });
+                    log("✓ Client App SDK initialisiert");
                 }
-            } catch (e) {
-                log("❌ Fehler: " + e.message);
+            } catch (err) {
+                log("⚠️ Client App SDK Warnung: " + err.message);
             }
+
+            // C. Authentifizierung & WebSockets starten
+            initGenesysNotifications();
         });
 
         async function initGenesysNotifications() {
-            const platformClient = require('platformClient');
-            const client = platformClient.ApiClient.instance;
-            client.setEnvironment('mypurecloud.ie'); // Irland
-
-            // Nutzung des vorhandenen Client-Tokens (aus dem Desktop Kontext)
-            // Hinweis: Falls Token fehlt, muss Implicit Grant ausgeführt werden.
-            const notificationsApi = new platformClient.NotificationsApi();
-            const usersApi = new platformClient.UsersApi();
-
             try {
-                // 1. Me-User laden
+                const platformClient = window.platformClient;
+                if (!platformClient) {
+                    log("❌ Fehler: Genesys Platform SDK nicht geladen.");
+                    return;
+                }
+
+                const client = platformClient.ApiClient.instance;
+                client.setEnvironment(ENVIRONMENT);
+
+                // Dynamische Redirect-URI ermitteln (ohne Query-Parameter)
+                const redirectUri = window.location.href.split('?')[0].split('#')[0];
+
+                // Prüfen, ob wir mit einem Authorization Code von der Login-Seite zurückkehren
+                const urlParams = new URLSearchParams(window.location.search);
+                const authCode = urlParams.get('code');
+
+                if (authCode) {
+                    log("🔑 Authorization Code empfangen. Tausche Code via PKCE ein...");
+                    await client.loginCodeAuthorization(CLIENT_ID, redirectUri, { authCode: authCode });
+                    
+                    // URL-Parameter im Browser säubern
+                    window.history.replaceState({}, document.title, redirectUri);
+                    log("✓ PKCE Authentifizierung erfolgreich!");
+
+                } else if (!client.authData || !client.authData.accessToken) {
+                    log("🔄 Kein Token vorhanden. Leite zum PKCE Login weiter...");
+                    client.loginCodeAuthorization(CLIENT_ID, redirectUri);
+                    return;
+                }
+
+                // --- AB HIER: Authentifiziert ---
+                const usersApi = new platformClient.UsersApi();
+                const notificationsApi = new platformClient.NotificationsApi();
+
+                // 1. Agenten-Details laden
+                log("Lade Agenten-Profil...");
                 const me = await usersApi.getUsersMe();
-                log(`✓ Agent erkannt: ${me.name} (${me.email})`);
+                document.getElementById("agentEmail").textContent = me.email || '-';
+                log(`✓ Agent angemeldet: ${me.name}`);
 
-                // 2. Notification Channel erstellen
+                // 2. WebSocket Channel erstellen
                 const channel = await notificationsApi.postNotificationsChannels();
-                log("✓ WebSocket Channel erstellt");
+                log("✓ WebSocket Channel geöffnet");
 
-                // 3. WebSocket öffnen
                 const socket = new WebSocket(channel.connectUri);
 
                 socket.onopen = async () => {
-                    log("🟢 WebSocket verbunden - Registriere Topics...");
+                    log("🟢 WebSocket verbunden! Registriere Topics...");
 
-                    // Subscription 1: Anrufevents (Connected, Hangup, Wrapup)
-                    // Subscription 2: Agenten-Status (Ready, Away, Busy)
                     const topics = [
                         { id: `v2.users.${me.id}.conversations` },
-                        { id: `v2.users.${me.id}.presence` },
-                        { id: `v2.users.${me.id}.routingStatus` }
+                        { id: `v2.users.${me.id}.presence` }
                     ];
 
                     await notificationsApi.postNotificationsChannelSubscriptions(channel.id, topics);
-                    log("✓ Event-Subscriptions aktiv!");
+                    log("✓ Realtime-Events aktiv!");
                 };
 
-                // 4. WebSocket Event-Listener für Live-Status
+                // 3. Empfang von Live-Events
                 socket.onmessage = (event) => {
                     const data = JSON.parse(event.data);
                     const topic = data.topicName;
 
-                    // A. ANRUF-EVENTS (Conversations)
+                    // Anrufevents (Connected, Ringing, Hangup)
                     if (topic && topic.includes('conversations')) {
                         const conversation = data.eventBody;
                         const callParticipant = conversation.participants.find(p => p.purpose === 'customer' || p.purpose === 'external');
                         
                         if (callParticipant && callParticipant.calls && callParticipant.calls.length > 0) {
                             const call = callParticipant.calls[0];
-                            const state = call.state; // alerting, connected, disconnected, terminated
+                            const state = call.state;
 
                             document.getElementById("interactionId").textContent = conversation.id;
-                            document.getElementById("customerNumber").textContent = callParticipant.ani || '-';
-                            document.getElementById("dnis").textContent = callParticipant.dnis || '-';
+                            if (callParticipant.ani) {
+                                document.getElementById("customerNumber").textContent = callParticipant.ani;
+                            }
 
                             if (state === 'alerting') {
-                                updateCallUI('alerting', '🔔 Eingehender Anruf...');
-                                log(`[CALL] Ringing von: ${callParticipant.ani}`);
+                                updateCallUI('alerting', '🔔 Klingelt...');
+                                log(`[CALL] Eingehender Anruf von: ${callParticipant.ani}`);
                             } else if (state === 'connected') {
-                                updateCallUI('connected', '📞 Gespräch aktiv (Connected)');
-                                log('[CALL] Gespräch angenommen');
+                                updateCallUI('connected', '📞 Gespräch aktiv');
+                                log('[CALL] Gespräch verbunden');
                             } else if (state === 'disconnected' || state === 'terminated') {
-                                updateCallUI('disconnected', '🔴 Aufgelegt (Hangup)');
-                                log(`[CALL] Gespräch beendet (Disconnect Reason: ${call.disconnectType || 'Hangup'})`);
+                                updateCallUI('disconnected', '🔴 Aufgelegt');
+                                log('[CALL] Gespräch beendet');
                                 
-                                // Nach 5 Sek zurück auf Idle
-                                setTimeout(() => updateCallUI('idle', 'Kein aktiver Anruf'), 5000);
+                                setTimeout(() => updateCallUI('idle', 'Kein aktiver Anruf'), 4000);
                             }
                         }
                     }
 
-                    // B. AGENTEN-PRESENCE (Ready, Away, Busy etc.)
+                    // Agent Presence Events (Ready, Away, Busy etc.)
                     if (topic && topic.includes('presence')) {
                         const presence = data.eventBody.presenceDefinition.systemPresence;
                         document.getElementById("agentPresence").textContent = presence;
                         log(`[PRESENCE] Neuer Status: ${presence}`);
                     }
+                };
 
-                    // C. ROUTING STATUS (Wrap-up / IDLE)
-                    if (topic && topic.includes('routingStatus')) {
-                        const routingState = data.eventBody.routingStatus.status; // IDLE, INTERACTING, COMMUNICATING, OFF_QUEUE
-                        log(`[ROUTING] Agent Routing Status: ${routingState}`);
-                        
-                        if (routingState === 'OFF_QUEUE' || routingState === 'IDLE') {
-                            if (document.getElementById("callStateBadge").textContent === 'DISCONNECTED') {
-                                updateCallUI('wrapup', '📝 Wrap-Up beendet (Done)');
-                            }
-                        }
-                    }
+                socket.onerror = (err) => {
+                    log("❌ WebSocket Fehler: " + JSON.stringify(err));
                 };
 
             } catch (err) {
-                log("❌ Fehler bei Notifications: " + (err.message || JSON.stringify(err)));
+                log("❌ Authentifizierungs-/API-Fehler: " + (err.message || JSON.stringify(err)));
             }
         }
     </script>
