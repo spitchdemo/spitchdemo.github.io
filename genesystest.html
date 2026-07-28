@@ -2,30 +2,175 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Call Script iFrame</title>
-    <!-- 1. Offizielles Genesys Client App SDK einbinden -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesys Call Monitor</title>
+    <!-- Genesys Client App SDK -->
     <script src="https://sdk-cdn.mypurecloud.com/client-app-sdk/v2/purecloud-client-app-sdk.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f5f7;
+            color: #333;
+            margin: 0;
+            padding: 16px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ffab00; /* Standard: Orange (Wartend) */
+            margin-right: 8px;
+            display: inline-block;
+        }
+
+        .status-dot.connected {
+            background-color: #36b37e; /* Grün: Verbunden */
+        }
+
+        .status-dot.error {
+            background-color: #ff5630; /* Rot: Fehler */
+        }
+
+        .status-text {
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+
+        .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            color: #6b778c;
+            font-weight: 500;
+        }
+
+        .value {
+            font-weight: 600;
+            font-family: monospace;
+            color: #172b4d;
+        }
+
+        .log-box {
+            background: #1e1e1e;
+            color: #4af626;
+            font-family: monospace;
+            font-size: 11px;
+            padding: 10px;
+            border-radius: 6px;
+            height: 120px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
 </head>
 <body>
-	Genesys Desktop
-    <pre id="log"></pre>
+
+    <!-- 1. Visuelle Status-Karte -->
+    <div class="card">
+        <div class="status-container">
+            <span id="statusDot" class="status-dot"></span>
+            <span id="statusText" class="status-text">Initialisiere...</span>
+        </div>
+
+        <div class="data-row">
+            <span class="label">Interaction ID:</span>
+            <span id="interactionId" class="value">-</span>
+        </div>
+        <div class="data-row">
+            <span class="label">Anrufer (ANI):</span>
+            <span id="customerNumber" class="value">-</span>
+        </div>
+        <div class="data-row">
+            <span class="label">Agent Email:</span>
+            <span id="agentEmail" class="value">-</span>
+        </div>
+    </div>
+
+    <!-- 2. Live Log-Konsole -->
+    <div class="log-box" id="log">--- System Log gestartet ---<br></div>
 
     <script>
         function log(msg) {
-            document.getElementById("log").textContent += msg + "\n";
+            const logElem = document.getElementById("log");
+            const time = new Date().toLocaleTimeString();
+            logElem.innerHTML += `[${time}] ${msg}<br>`;
+            logElem.scrollTop = logElem.scrollHeight;
+            console.log(msg);
         }
 
-        // 2. SDK initialisieren (ohne window.parent zu berühren)
-        const ClientApp = window.purecloud.apps.ClientApp;
-        const myApp = new ClientApp({
-            pcEnvironment: 'mypurecloud.de' // Passen Sie Ihre Region an (z. B. mypurecloud.de, mypurecloud.ie)
-        });
+        function setStatus(text, type) {
+            const statusText = document.getElementById("statusText");
+            const statusDot = document.getElementById("statusDot");
+            
+            statusText.textContent = text;
+            statusDot.className = "status-dot " + (type || "");
+        }
 
-        log("App erfolgreich im Genesys Desktop registriert.");
+        window.addEventListener('DOMContentLoaded', () => {
+            // A. URL-Parameter auslesen (Vom Genesys Script übergeben)
+            const urlParams = new URLSearchParams(window.location.search);
+            const interactionId = urlParams.get('interactionId') || 'Nicht übergeben';
+            const customerNumber = urlParams.get('customerNumber') || 'Nicht übergeben';
+            const agentEmail = urlParams.get('agentEmail') || 'Nicht übergeben';
 
-        // 3. Beispiel: Auf Fokus-Events des iFrames reagieren
-        myApp.lifecycle.addFocusListener(() => {
-            log("iFrame hat Fokus erhalten");
+            // Werte in die UI schreiben
+            document.getElementById("interactionId").textContent = interactionId;
+            document.getElementById("customerNumber").textContent = customerNumber;
+            document.getElementById("agentEmail").textContent = agentEmail;
+
+            log("URL-Parameter ausgelesen.");
+
+            // B. Genesys SDK Initialisierung
+            try {
+                if (window.purecloud && window.purecloud.apps && window.purecloud.apps.ClientApp) {
+                    const ClientApp = window.purecloud.apps.ClientApp;
+                    
+                    // Region anpassen falls nötig (mypurecloud.de, mypurecloud.ie etc.)
+                    const myApp = new ClientApp({ pcEnvironment: 'mypurecloud.de' });
+
+                    setStatus("Bereit / Im Call", "connected");
+                    log("✓ Genesys Client App SDK erfolgreich verbunden!");
+
+                    // Lifecycle-Event
+                    myApp.lifecycle.addFocusListener(() => {
+                        log("iFrame hat Fokus erhalten");
+                    });
+
+                } else {
+                    setStatus("SDK Fehler", "error");
+                    log("❌ SDK geladen, aber purecloud.apps.ClientApp fehlt.");
+                }
+            } catch (err) {
+                setStatus("Fehler", "error");
+                log("❌ Fehler bei SDK-Initialisierung: " + err.message);
+            }
         });
     </script>
 </body>
