@@ -31,7 +31,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=330, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Card Widget (330x170)</title>
   
   <!-- Modern Clean Font -->
@@ -49,8 +49,11 @@
     }
 
     html, body {
-      width: 330px;
-      height: 170px;
+      width: 100%;
+      height: 100%;
+      max-width: 330px;
+      max-height: 170px;
+      margin: 0 auto;
       overflow: hidden;
       background: transparent;
     }
@@ -60,12 +63,15 @@
       align-items: center;
       justify-content: center;
       padding: 5px;
+      box-sizing: border-box;
     }
 
     /* Card Container matching screenshot design */
     .card {
       width: 320px;
       height: 160px;
+      max-width: 320px;
+      max-height: 160px;
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 14px;
@@ -75,6 +81,7 @@
       flex-direction: column;
       justify-content: space-between;
       transition: all 0.2s ease;
+      box-sizing: border-box;
     }
 
     /* Dark Mode support via URL ?theme=dark */
