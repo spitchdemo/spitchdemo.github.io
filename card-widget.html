@@ -1,0 +1,372 @@
+<!--
+  Card Widget (330px x 170px)
+  
+  URL Parameters Documentation & Example Usage:
+  ---------------------------------------------------------------------------------
+  ?title=...    Header title (Default: "ID & VERIFIZIERUNG")
+  ?icon=...     Top-right icon: shield, phone, user, info, check, alert, star, lock, none (Default: "shield")
+  ?theme=...    Color theme: light, dark (Default: "light")
+  ?t1=...       Label for Row 1
+  ?v1=...       Value for Row 1 (Unpassed or empty values default to "—")
+  ?t2=...       Label for Row 2
+  ?v2=...       Value for Row 2 (Unpassed or empty values default to "—")
+  ?t3=...       Label for Row 3
+  ?v3=...       Value for Row 3 (Unpassed or empty values default to "—")
+  
+  Example URLs:
+  1. Standard call with title and phone icon:
+     card-widget.html?title=new-call&icon=phone&t1=ANI&v1=%2B491701234567
+
+  2. Customer info with VIP star icon:
+     card-widget.html?title=KUNDEN-INFO&icon=star&t1=Status&v1=CONNECTED&t2=Klasse&v2=VIP
+
+  3. Verification card with shield icon and badges (PASSED, SKIPPED):
+     card-widget.html?title=ID%20%26%20VERIFIZIERUNG&icon=shield&t1=ID&v1=UNKNOWN&t2=Verify&v2=SKIPPED
+
+  4. Warning alert in dark mode without icon:
+     card-widget.html?theme=dark&title=WARNUNG&icon=none&t1=Hinweis&v1=FAILED
+  ---------------------------------------------------------------------------------
+-->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Card Widget (330x170)</title>
+  
+  <!-- Modern Clean Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    html, body {
+      width: 330px;
+      height: 170px;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+    }
+
+    /* Card Container matching screenshot design */
+    .card {
+      width: 320px;
+      height: 160px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+
+    /* Dark Mode support via URL ?theme=dark */
+    body.theme-dark .card {
+      background: #0f172a;
+      border-color: #1e293b;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Header Section */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #f1f5f9;
+      min-height: 26px;
+    }
+    body.theme-dark .card-header {
+      border-bottom-color: #1e293b;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 260px;
+    }
+    body.theme-dark .card-title {
+      color: #94a3b8;
+    }
+
+    .card-icon {
+      width: 18px;
+      height: 18px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    body.theme-dark .card-icon {
+      color: #94a3b8;
+    }
+
+    /* Rows Section */
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      flex-grow: 1;
+      padding-top: 4px;
+    }
+
+    .data-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      line-height: 1.2;
+      padding: 3px 0;
+      border-bottom: 1px dashed #f8fafc;
+      min-height: 24px;
+    }
+    .data-row:last-child {
+      border-bottom: none;
+    }
+    body.theme-dark .data-row {
+      border-bottom-color: #1e293b;
+    }
+
+    .data-label {
+      color: #64748b;
+      font-weight: 500;
+    }
+    body.theme-dark .data-label {
+      color: #94a3b8;
+    }
+
+    .data-value {
+      color: #1e293b;
+      font-weight: 600;
+      text-align: right;
+      max-width: 190px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    body.theme-dark .data-value {
+      color: #f1f5f9;
+    }
+
+    /* Status Badges / Pills matching UI screenshot */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: 1px solid #e2e8f0;
+      background-color: #f8fafc;
+      color: #475569;
+    }
+
+    .badge-neutral {
+      background-color: #f1f5f9;
+      color: #475569;
+      border-color: #e2e8f0;
+    }
+    body.theme-dark .badge-neutral {
+      background-color: #1e293b;
+      color: #cbd5e1;
+      border-color: #334155;
+    }
+
+    .badge-success {
+      background-color: #f0fdf4;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+    body.theme-dark .badge-success {
+      background-color: #064e3b;
+      color: #6ee7b7;
+      border-color: #047857;
+    }
+
+    .badge-warning {
+      background-color: #fffbeb;
+      color: #92400e;
+      border-color: #fef3c7;
+    }
+    body.theme-dark .badge-warning {
+      background-color: #78350f;
+      color: #fde68a;
+      border-color: #b45309;
+    }
+
+    .badge-danger {
+      background-color: #fef2f2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
+    body.theme-dark .badge-danger {
+      background-color: #7f1d1d;
+      color: #fca5a5;
+      border-color: #b91c1c;
+    }
+
+    .empty-dash {
+      color: #94a3b8;
+      font-weight: 400;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <!-- Header -->
+    <div class="card-header">
+      <span class="card-title" id="cardTitle">ID & VERIFIZIERUNG</span>
+      <div class="card-icon" id="cardIcon"></div>
+    </div>
+
+    <!-- Body / 3 Key-Value Rows -->
+    <div class="card-body">
+      <!-- Row 1 -->
+      <div class="data-row">
+        <span class="data-label" id="label1"></span>
+        <span class="data-value" id="val1">—</span>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="data-row">
+        <span class="data-label" id="label2"></span>
+        <span class="data-value" id="val2">—</span>
+      </div>
+
+      <!-- Row 3 -->
+      <div class="data-row">
+        <span class="data-label" id="label3"></span>
+        <span class="data-value" id="val3">—</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // SVG Icon Registry for top-right corner (?icon=...)
+    const ICONS = {
+      shield: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>`,
+      phone: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`,
+      user: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
+      info: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`,
+      check: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
+      alert: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`,
+      star: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`,
+      lock: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
+      none: ``
+    };
+
+    // Utility to get URL parameters safely
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    // HTML Escaping against XSS
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Helper to format values as badges or plain text
+    function formatValue(val) {
+      if (val === null || val === undefined || val.trim() === '') {
+        return '<span class="empty-dash">—</span>';
+      }
+
+      const cleanVal = val.trim();
+      const upperVal = cleanVal.toUpperCase();
+
+      // Status keywords styled as Badges (like in screenshot: UNKNOWN, SKIPPED, PASSED)
+      const statusKeywords = ['UNKNOWN', 'SKIPPED', 'PASSED', 'VERIFIED', 'FAILED', 'PENDING', 'IDLE', 'ALERTING', 'CONNECTED', 'OK', 'NOK', 'SUCCESS'];
+      
+      if (statusKeywords.includes(upperVal)) {
+        let badgeClass = 'badge-neutral';
+        if (['PASSED', 'VERIFIED', 'CONNECTED', 'OK', 'SUCCESS'].includes(upperVal)) {
+          badgeClass = 'badge-success';
+        } else if (['FAILED', 'ERROR', 'NOK', 'REJECTED'].includes(upperVal)) {
+          badgeClass = 'badge-danger';
+        } else if (['PENDING', 'ALERTING', 'WARNING'].includes(upperVal)) {
+          badgeClass = 'badge-warning';
+        }
+        return `<span class="badge ${badgeClass}">${escapeHtml(cleanVal)}</span>`;
+      }
+
+      return escapeHtml(cleanVal);
+    }
+
+    function initCard() {
+      // 1. Theme Configuration (?theme=dark)
+      const theme = getQueryParam('theme');
+      if (theme === 'dark') {
+        document.body.classList.add('theme-dark');
+      }
+
+      // 2. Header Title (?title=new-call or ?header=...) -> Default: "ID & VERIFIZIERUNG"
+      const customTitle = getQueryParam('title') ?? getQueryParam('header') ?? 'ID & VERIFIZIERUNG';
+      document.getElementById('cardTitle').textContent = customTitle;
+
+      // 3. Icon selection (?icon=shield|phone|user|info|check|alert|star|lock|none)
+      const iconKey = (getQueryParam('icon') || 'shield').toLowerCase();
+      const iconContainer = document.getElementById('cardIcon');
+      if (ICONS[iconKey] !== undefined) {
+        iconContainer.innerHTML = ICONS[iconKey];
+      } else {
+        iconContainer.innerHTML = ICONS['shield']; // default
+      }
+
+      // 4. Row 1 Parameters (?t1=... & ?v1=...)
+      const t1 = getQueryParam('t1') ?? '';
+      const v1 = getQueryParam('v1');
+      document.getElementById('label1').textContent = t1;
+      document.getElementById('val1').innerHTML = formatValue(v1);
+
+      // 5. Row 2 Parameters (?t2=... & ?v2=...)
+      const t2 = getQueryParam('t2') ?? '';
+      const v2 = getQueryParam('v2');
+      document.getElementById('label2').textContent = t2;
+      document.getElementById('val2').innerHTML = formatValue(v2);
+
+      // 6. Row 3 Parameters (?t3=... & ?v3=...)
+      const t3 = getQueryParam('t3') ?? '';
+      const v3 = getQueryParam('v3');
+      document.getElementById('label3').textContent = t3;
+      document.getElementById('val3').innerHTML = formatValue(v3);
+    }
+
+    // Run on load
+    document.addEventListener('DOMContentLoaded', initCard);
+  </script>
+</body>
+</html>
