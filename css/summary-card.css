@@ -1,0 +1,38 @@
+.aa-summary-card {
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 16px;
+  background: #fafafa;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  max-width: 480px;
+}
+
+.aa-summary-card table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.aa-summary-card th, .aa-summary-card td {
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.aa-summary-card .aa-copy-btn {
+  margin-top: 12px;
+  padding: 6px 14px;
+  font-size: 12px;
+  border: none;
+  border-radius: 6px;
+  background: #0078d4;
+  color: white;
+  cursor: pointer;
+}
+
+.aa-summary-card .aa-copy-btn:hover {
+  background: #005fa3;
+}
